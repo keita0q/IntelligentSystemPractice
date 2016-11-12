@@ -1,5 +1,6 @@
 import java.awt.Point;
 import java.util.HashMap;
+import java.util.Map;
 
 /*
  Example.java
@@ -43,13 +44,29 @@ public class Example {
 		System.out.println(fs.readSlotValue("tora", "height", true));
 		System.out.println(fs.readSlotValue("tora", "weight", true));
 
-		HashMap<String, Point> pointTable = new HashMap<>();
-		pointTable.put("human", new Point(150,150));
+		// FrameGUIの使い方
+		Map<String, Point> pointTable = new HashMap<>();
+		pointTable.put("human", new Point(150, 150));
 		pointTable.put("tora", new Point(50, 50));
 		pointTable.put("OS", new Point(300, 50));
 		pointTable.put("Mac OS", new Point(300, 200));
 
 		new FrameGUI(fs, pointTable).setVisible(true);
-	}
 
+		// DBpediaクエリの使用例
+		Map<String, String> hash = new HashMap<>();
+		hash.put("通貨", "?x");
+		hash.put("首都", "?y");
+		System.out.println(DBpedia.query("アメリカ", hash));
+
+		hash.clear();
+		hash.put("首都", "ロンドン");
+		hash.put("最大都市", "ロンドン");
+		System.out.println(DBpedia.query("?name", hash));
+
+		// 自然言語解析例
+		Map<String, String> slots = new HashMap<>();
+		String name = NaturalLanguage.questionAnalysis("身長が160で、体重が52な学生は誰？", slots);
+		System.out.println("name:" + name + "\nslots:" + slots);
+	}
 }

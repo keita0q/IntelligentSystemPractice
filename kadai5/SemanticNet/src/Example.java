@@ -1,6 +1,7 @@
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /***
  * Semantic Net の使用例
@@ -45,8 +46,8 @@ public class Example {
 		query.add(new Link("hobby", "?y", "baseball"));
 		sn.query(query);
 
-		//----------------------------------------------------
-		HashMap<String, Point> pointTable = new HashMap<>();
+		// ----------------------------------------------------
+		Map<String, Point> pointTable = new HashMap<>();
 		pointTable.put("baseball", new Point(80, 100));
 		pointTable.put("sports", new Point(20, 20));
 		pointTable.put("Taro", new Point(200, 200));

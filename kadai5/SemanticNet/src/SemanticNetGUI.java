@@ -2,7 +2,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -23,7 +23,7 @@ public class SemanticNetGUI extends JFrame {
 	 * @param pointTable
 	 *            ノード名に対する座標テーブル
 	 */
-	public SemanticNetGUI(SemanticNet sn, HashMap<String, Point> pointTable) {
+	public SemanticNetGUI(SemanticNet sn, Map<String, Point> pointTable) {
 		super("SemanticNetGUI");
 		paintPanel = new PaintPanel(sn, pointTable);
 		add(paintPanel);
@@ -41,7 +41,7 @@ class PaintPanel extends JPanel {
 	// 破線の空白のサイズ
 	final static double BLANK_SIZE = 6;
 	// ノード名に対する座標テーブル
-	private HashMap<String, Point> pointTable;
+	private Map<String, Point> pointTable;
 	private SemanticNet sn;
 	// 最大座標からの余白の長さ
 	final static int MARGIN = 100;
@@ -56,7 +56,7 @@ class PaintPanel extends JPanel {
 	 * @param pointTable
 	 *            ノード名に対する座標テーブル
 	 */
-	public PaintPanel(SemanticNet sn, HashMap<String, Point> pointTable) {
+	public PaintPanel(SemanticNet sn, Map<String, Point> pointTable) {
 		this.sn = sn;
 		this.pointTable = pointTable;
 

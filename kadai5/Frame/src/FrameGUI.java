@@ -1,12 +1,22 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /**
  * フレームGUIクラス<br>
@@ -17,8 +27,13 @@ import javax.swing.JPanel;
  *
  * @author Yoshida
  */
-public class FrameGUI extends JFrame {
+public class FrameGUI extends JFrame implements ActionListener {
 	PaintPanel paintPanel;// 描画パネル
+	JPanel commandPanel;
+	JTextField text;
+	JButton search;
+	JTextArea info;
+	JScrollPane scroll;
 
 	/**
 	 * フレームGUIコンストラクタ
@@ -28,12 +43,51 @@ public class FrameGUI extends JFrame {
 	 * @param pointTable
 	 *            ノード名に対する座標テーブル
 	 */
-	public FrameGUI(AIFrameSystem fs, HashMap<String, Point> pointTable) {
+	public FrameGUI(AIFrameSystem fs, Map<String, Point> pointTable) {
 		super("AIFrameGUI");
 		paintPanel = new PaintPanel(fs, pointTable);
-		add(paintPanel);
+
+		text = new JTextField(30);
+		text.setToolTipText("質問文を入力してください");
+		search = new JButton("検索");
+		search.addActionListener(this);
+		info = new JTextArea(2, 30);
+		info.setEditable(false);
+		info.setBackground(Color.LIGHT_GRAY);
+		info.setToolTipText("情報表示エリア");
+		scroll = new JScrollPane(info);
+		commandPanel = new JPanel(new FlowLayout());
+		commandPanel.add(text);
+		commandPanel.add(search);
+
+		setLayout(new BorderLayout());
+		add(commandPanel, BorderLayout.NORTH);
+		add(paintPanel, BorderLayout.CENTER);
+		add(scroll, BorderLayout.SOUTH);
 		pack();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+
+	public void searchPressed() {
+		String question = text.getText();
+		Map<String, String> slots = new HashMap<>();
+		String name = NaturalLanguage.questionAnalysis(question, slots);
+		System.out.println(name);
+		System.out.println(slots);
+		// *************ここで課題5-3のメソッドを呼ぶ************
+		// 課題5-3で答えられない場合、DBpediaを利用する
+		// DBpediaの利用
+		List<Map<String, String>> bindings = DBpedia.query(name, slots);
+		System.out.println(bindings);
+		info.setText(NaturalLanguage.toNL(name, slots, bindings));
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		Object obj = event.getSource();
+		if (obj == search) {
+			searchPressed();
+		}
 	}
 }
 
@@ -47,7 +101,7 @@ class PaintPanel extends JPanel {
 	final static int CHAR_WIDTH = FONT_SIZE / 2 + 1;// 文字幅
 	final static int NEXT_LINE = FONT_SIZE + 3;// 次の行までの距離
 	// ノード名に対する座標テーブル
-	private HashMap<String, Point> pointTable;
+	private Map<String, Point> pointTable;
 	private AIFrameSystem fs;
 	// 最大座標からの余白の長さ
 	final static int MARGIN = 100;
@@ -62,7 +116,7 @@ class PaintPanel extends JPanel {
 	 * @param pointTable
 	 *            ノード名に対する座標テーブル
 	 */
-	public PaintPanel(AIFrameSystem fs, HashMap<String, Point> pointTable) {
+	public PaintPanel(AIFrameSystem fs, Map<String, Point> pointTable) {
 		this.fs = fs;
 		this.pointTable = pointTable;
 

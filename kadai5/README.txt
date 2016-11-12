@@ -8,6 +8,7 @@ Frameディレクトリ
 	FrameGUI.javaファイルを追加。
 	DBpedia.javaファイルを追加。
 	Morpheme.javaファイルを追加。
+	NaturalLanguage.javaファイルを追加。
 	AIFrame.javaファイルにpublic String getName()、public Set <String> getSlotNames()メソッドを追加。
 	AIFrameSystem.javaファイルにpublic AIFrame getAIFrame(String name)メソッドを追加。
 	Example.javaファイルにFrameGUIクラスの使い方の例を追加。
