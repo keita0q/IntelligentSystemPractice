@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,18 +14,17 @@ public class NaturalLanguage {
 	/**
 	 * 自然言語の質問文から聞いていることを取り出す<br>
 	 * 例:<br>
-	 * "nameのslotは何ですか?" -> return "name", slots={slot=?value}<br>
-	 * "slotがvalueなものは何?" -> return "?name", slots={slot=value} <br>
-	 * "slot1がvalue1で、slot2がvalue2なclassは何?"-> return "?name",
-	 * slots={slot1=value1, slot2=value2, is-a=class}
+	 * "nameのslotは何ですか?" -> return [(name, slot, ?value)]<br>
+	 * "slotがvalueなものは何?" -> return [(?name, slot, value)] <br>
+	 * "slot1がvalue1で、slot2がvalue2なclassは何?" -> return <br>
+	 * [(?name, slot1, value1), (?name, slot2, value2), (?name, is-a, class)]
 	 *
 	 * @param question
 	 *            自然言語の質問文
-	 * @param slots
-	 *            質問内容(slot, value)の組
-	 * @return name フレーム名
+	 * @return 質問のリスト
 	 */
-	public static String questionAnalysis(String question, Map<String, String> slots) {
+	public static List<Link> questionAnalysis(String question) {
+		List<Link> query = new ArrayList<>();
 		// 形態素解析
 		List<Morpheme> morphemes = Morpheme.analyzeMorpheme(question);
 		for (Iterator<Morpheme> it = morphemes.iterator(); it.hasNext();) {
@@ -61,61 +61,46 @@ public class NaturalLanguage {
 									} else {
 										// 助詞が「の」のとき
 										if (particle.equals("の")) {
-											slots.put(noun2, "?value");
-											return noun1;
+											query.add(new Link(noun1, noun2, "?value"));
+											return query;
 										}
-										slots.put(noun1, noun2);
+										query.add(new Link("?name", noun1, noun2));
 										break;
 									}
 								}
 							} else if (particle.equals("は")) {
 								// 助詞が「は」のとき
-								slots.put("is-a", noun1);
+								query.add(new Link("?name", "is-a", noun1));
 							}
 						}
 					} else if (particle.equals("は")) {
 						// 次の要素がなく、助詞が「は」のとき
-						slots.put("is-a", noun1);
+						query.add(new Link("?name", "is-a", noun1));
 					}
 				}
 			}
 		}
-		return "?name";
+		return query;
 	}
 
 	/**
-	 * 求めた結果を自然言語へ変換
+	 * 求めた結果を自然言語へ変換(questionAnalysisからの結果を想定)
 	 *
-	 * @param name
-	 *            questionAnalysisで求めたname
-	 * @param slots
-	 *            questionAnalysisで求めたslots
 	 * @param bindings
 	 *            変数束縛情報のリスト
-	 * @return
+	 * @return 自然言語の応答文
 	 */
-	public static String toNL(String name, Map<String, String> slots, List<Map<String, String>> bindings) {
-		String answer;
-		if (name.startsWith("?")) {
-			answer = "該当する" + (slots.containsKey("is-a") ? slots.get("is-a") : "もの") + "は";
-			if (bindings.isEmpty()) {
-				answer += "存在しません。";
-				return answer;
+	public static String toNL(List<Map<String, String>> bindings) {
+		if (bindings.isEmpty())
+			return "そのようなものは存在しません。";
+
+		String answer = "";
+		for (Map<String, String> binding : bindings) {
+			for (String ans : binding.values()) {
+				answer += ans + "と";
 			}
-			for (Map<String, String> binding : bindings)
-				answer += binding.get(name) + "と";
-			answer = answer.substring(0, answer.length() - 1) + "です。";
-		} else {
-			String slot = slots.keySet().iterator().next();
-			answer = name + "の" + slot + "は";
-			if (bindings.isEmpty()) {
-				answer += "存在しません。";
-				return answer;
-			}
-			String value = slots.get(slot);
-			answer += bindings.get(0).get(value) + "です。";
 		}
+		answer = answer.substring(0, answer.length() - 1) + "です。";
 		return answer;
 	}
-
 }

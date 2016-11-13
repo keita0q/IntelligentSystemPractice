@@ -21,27 +21,23 @@ public class DBpedia {
 	/**
 	 * sparqlのクエリへ変換
 	 *
-	 * @param name
-	 *            フレーム名(変数でもよい)
-	 * @param slots
-	 *            スロットとその値(変数を含んで良い)
+	 * @param query
+	 *            質問のリスト
 	 * @return sparqlのクエリ
 	 */
-	public static String toSparqlQuery(String name, Map<String, String> slots) {
-		String sparql = "SELECT * WHERE { ";
-		String obj;
-		if (name.startsWith("?")) {
-			// sparql += name + " ";
-			obj = name + " ";
-		} else {
-			// sparql += "<" + pageRedirects(name) + "> ";
-			obj = "<" + pageRedirects(name) + "> ";
-		}
-		for (String slot : slots.keySet()) {
+	public static String toSparqlQuery(List<Link> query) {
+		String sparql = "SELECT DISTINCT * WHERE { ";
+
+		for (Link link : query) {
+			String frame = link.getFrame(), slot = link.getSlot(), value = link.getValue();
 			if (slot.equals("is-a") || slot.equals("ako"))
 				continue;
-			String value = slots.get(slot);
-			String row = "{" + obj;
+			String row = "{";
+			if (frame.startsWith("?")) {
+				row += frame + " ";
+			} else {
+				row += "<" + pageRedirects(frame) + "> ";
+			}
 			if (slot.startsWith("?")) {
 				row += slot + " ";
 			} else {
@@ -77,14 +73,12 @@ public class DBpedia {
 	/**
 	 * DBpediaへ問い合わせる
 	 *
-	 * @param name
-	 *            フレーム名(変数でもよい)
-	 * @param slots
-	 *            スロット名とその値(変数を含んでよい)
+	 * @param query
+	 *            質問のリスト
 	 * @return 変数束縛情報のリスト
 	 */
-	public static List<Map<String, String>> query(String name, Map<String, String> slots) {
-		String sparqlQuery = toSparqlQuery(name, slots); // name、slotsからSPARQLクエリへ変換
+	public static List<Map<String, String>> query(List<Link> query) {
+		String sparqlQuery = toSparqlQuery(query); // queryからSPARQLクエリへ変換
 		String format = "text/csv"; // 受け取る検索結果のフォーマットにcsvを指定
 		// SPARQL検索のURL
 		String searchURL = "";
@@ -156,7 +150,7 @@ public class DBpedia {
 	 */
 	public static String pageRedirects(String name) {
 		// nameからリダイレクトするページのURL
-		String sparqlQuery = "SELECT * WHERE {<http://ja.dbpedia.org/resource/" + name
+		String sparqlQuery = "SELECT DISTINCT * WHERE {<http://ja.dbpedia.org/resource/" + name
 				+ "> <http://dbpedia.org/ontology/wikiPageRedirects> ?x. } LIMIT 10";
 		String format = "text/csv"; // 受け取る検索結果のフォーマットにcsvを指定
 		// SPARQL検索のURL

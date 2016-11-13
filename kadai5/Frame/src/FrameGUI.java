@@ -7,9 +7,11 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -31,7 +33,7 @@ public class FrameGUI extends JFrame implements ActionListener {
 	PaintPanel paintPanel;// 描画パネル
 	JPanel commandPanel;
 	JTextField text;
-	JButton search;
+	JButton search, searchNL;
 	JTextArea info;
 	JScrollPane scroll;
 
@@ -51,6 +53,8 @@ public class FrameGUI extends JFrame implements ActionListener {
 		text.setToolTipText("質問文を入力してください");
 		search = new JButton("検索");
 		search.addActionListener(this);
+		searchNL = new JButton("自然言語で検索");
+		searchNL.addActionListener(this);
 		info = new JTextArea(2, 30);
 		info.setEditable(false);
 		info.setBackground(Color.LIGHT_GRAY);
@@ -59,6 +63,7 @@ public class FrameGUI extends JFrame implements ActionListener {
 		commandPanel = new JPanel(new FlowLayout());
 		commandPanel.add(text);
 		commandPanel.add(search);
+		commandPanel.add(searchNL);
 
 		setLayout(new BorderLayout());
 		add(commandPanel, BorderLayout.NORTH);
@@ -68,18 +73,53 @@ public class FrameGUI extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
+	/**
+	 * 入力されたテキストから、質問を取り出す
+	 *
+	 * @return
+	 */
+	public List<Link> getQuery() {
+		Pattern regex = Pattern.compile("\"(.*?)\""); // ""内を取り出す正規表現
+		Matcher matcher = regex.matcher(text.getText());// 入力されたテキストを解析
+		List<Link> query = new ArrayList<>();// ""で囲まれた部分を保存するリスト
+		try {
+			if (matcher.find()) {// ""で囲まれた部分があったとき
+				do {
+					String split[] = matcher.group(1).trim().split("\\s+");
+					query.add(new Link(split[0], split[1], split[2]));// 追加
+				} while (matcher.find());// 次の要素を探す
+			} else {// ""で囲まれた部分がない時、全体を1つのパターンとみなす
+				String split[] = text.getText().trim().split("\\s+");
+				query.add(new Link(split[0], split[1], split[2]));// 全体を追加
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			info.setText("入力形式が正しくありません。");
+		}
+		return query;
+	}
+
 	public void searchPressed() {
-		String question = text.getText();
-		Map<String, String> slots = new HashMap<>();
-		String name = NaturalLanguage.questionAnalysis(question, slots);
-		System.out.println(name);
-		System.out.println(slots);
+		List<Link> query = getQuery();
+		if (query.isEmpty())
+			return;
 		// *************ここで課題5-3のメソッドを呼ぶ************
 		// 課題5-3で答えられない場合、DBpediaを利用する
 		// DBpediaの利用
-		List<Map<String, String>> bindings = DBpedia.query(name, slots);
-		System.out.println(bindings);
-		info.setText(NaturalLanguage.toNL(name, slots, bindings));
+		List<Map<String, String>> bindings = DBpedia.query(query);
+		info.setText(bindings.toString());
+	}
+
+	public void searchNLPressed() {
+		String question = text.getText();
+		List<Link> query = NaturalLanguage.questionAnalysis(question);
+		System.out.println(query);
+		if (query.isEmpty())
+			return;
+		// *************ここで課題5-3のメソッドを呼ぶ************
+		// 課題5-3で答えられない場合、DBpediaを利用する
+		// DBpediaの利用
+		List<Map<String, String>> bindings = DBpedia.query(query);
+		info.setText(NaturalLanguage.toNL(bindings));
 	}
 
 	@Override
@@ -87,6 +127,8 @@ public class FrameGUI extends JFrame implements ActionListener {
 		Object obj = event.getSource();
 		if (obj == search) {
 			searchPressed();
+		} else if (obj == searchNL) {
+			searchNLPressed();
 		}
 	}
 }

@@ -1,14 +1,16 @@
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /*
  Example.java
  */
-
 public class Example {
 
 	public static void main(String args[]) {
+
 		System.out.println("Frame");
 
 		// フレームシステムの初期化
@@ -54,19 +56,18 @@ public class Example {
 		new FrameGUI(fs, pointTable).setVisible(true);
 
 		// DBpediaクエリの使用例
-		Map<String, String> hash = new HashMap<>();
-		hash.put("通貨", "?x");
-		hash.put("首都", "?y");
-		System.out.println(DBpedia.query("アメリカ", hash));
+		List<Link> list = new ArrayList<>();
+		list.add(new Link("アメリカ", "通貨", "?x"));
+		list.add(new Link("アメリカ", "首都", "?y"));
+		System.out.println(DBpedia.query(list));
 
-		hash.clear();
-		hash.put("首都", "ロンドン");
-		hash.put("最大都市", "ロンドン");
-		System.out.println(DBpedia.query("?name", hash));
+		list.clear();
+		list.add(new Link("?name", "首都", "ロンドン"));
+		list.add(new Link("?name", "最大都市", "ロンドン"));
+		System.out.println(DBpedia.query(list));
 
 		// 自然言語解析例
-		Map<String, String> slots = new HashMap<>();
-		String name = NaturalLanguage.questionAnalysis("身長が160で、体重が52な学生は誰？", slots);
-		System.out.println("name:" + name + "\nslots:" + slots);
+		List<Link> result = NaturalLanguage.questionAnalysis("身長が160で、体重が52な学生は誰？");
+		System.out.println(result);
 	}
 }
