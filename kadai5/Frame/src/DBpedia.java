@@ -14,7 +14,6 @@ import java.util.Map;
  * DBpediaを利用して質問に答える
  *
  * @author Yoshida
- *
  */
 public class DBpedia {
 

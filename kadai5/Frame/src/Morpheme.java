@@ -5,6 +5,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+/**
+ * 形態素クラス
+ */
 public class Morpheme {
 
 	// 表層形

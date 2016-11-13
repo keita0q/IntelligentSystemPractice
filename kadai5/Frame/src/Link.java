@@ -1,4 +1,8 @@
-
+/**
+ * 単体の質問の構造を表すクラス
+ *
+ * @author Yoshida
+ */
 public class Link {
 	String frame, slot, value;
 
