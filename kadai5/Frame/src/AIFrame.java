@@ -385,7 +385,7 @@ abstract class AIFrame {
 	}
 
 	public Set<String> getSuperNames() {
-		Set<String> set = new HashSet<>(mSlots.keySet());
+		Set<String> set = new HashSet<>();
 		for (Iterator<AIFrame> it = getSupers(); it != null && it.hasNext();) {
 			set.addAll(it.next().getSuperNames());
 		}
