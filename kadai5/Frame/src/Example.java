@@ -1,6 +1,7 @@
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +46,7 @@ public class Example {
 		fs.writeSlotValue("tora", "weight", new Integer(50));
 		System.out.println(fs.readSlotValue("tora", "height", true));
 		System.out.println(fs.readSlotValue("tora", "weight", true));
-
+		
 		// FrameGUIの使い方
 		Map<String, Point> pointTable = new HashMap<>();
 		pointTable.put("human", new Point(150, 150));

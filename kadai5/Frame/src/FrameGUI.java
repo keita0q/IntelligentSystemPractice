@@ -26,7 +26,7 @@ import javax.swing.JTextField;
  * public String getName()、 public Set <String> getSlotNames()メソッドの追加<br>
  * AIFrameSystem.javaの変更点 :<br>
  * public AIFrame getAIFrame(String name)メソッドの追加
- *
+ * 
  * @author Yoshida
  */
 public class FrameGUI extends JFrame implements ActionListener {
@@ -35,11 +35,11 @@ public class FrameGUI extends JFrame implements ActionListener {
 	JTextField text;
 	JButton search, searchNL;
 	JTextArea info;
-	JScrollPane scroll;
+	JScrollPane infoScroll;
 
 	/**
 	 * フレームGUIコンストラクタ
-	 *
+	 * 
 	 * @param fs
 	 *            描画したいフレームシステム
 	 * @param pointTable
@@ -55,11 +55,11 @@ public class FrameGUI extends JFrame implements ActionListener {
 		search.addActionListener(this);
 		searchNL = new JButton("自然言語で検索");
 		searchNL.addActionListener(this);
-		info = new JTextArea(2, 30);
+		info = new JTextArea(3, 30);
 		info.setEditable(false);
 		info.setBackground(Color.LIGHT_GRAY);
 		info.setToolTipText("情報表示エリア");
-		scroll = new JScrollPane(info);
+		infoScroll = new JScrollPane(info);
 		commandPanel = new JPanel(new FlowLayout());
 		commandPanel.add(text);
 		commandPanel.add(search);
@@ -68,15 +68,15 @@ public class FrameGUI extends JFrame implements ActionListener {
 		setLayout(new BorderLayout());
 		add(commandPanel, BorderLayout.NORTH);
 		add(paintPanel, BorderLayout.CENTER);
-		add(scroll, BorderLayout.SOUTH);
+		add(infoScroll, BorderLayout.SOUTH);
 		pack();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	/**
 	 * 入力されたテキストから、質問を取り出す
-	 *
-	 * @return
+	 * 
+	 * @return 質問のリスト
 	 */
 	public List<Link> getQuery() {
 		Pattern regex = Pattern.compile("\"(.*?)\""); // ""内を取り出す正規表現
@@ -98,6 +98,9 @@ public class FrameGUI extends JFrame implements ActionListener {
 		return query;
 	}
 
+	/**
+	 * 「検索」ボタンの動作
+	 */
 	public void searchPressed() {
 		List<Link> query = getQuery();
 		if (query.isEmpty())
@@ -109,6 +112,9 @@ public class FrameGUI extends JFrame implements ActionListener {
 		info.setText(bindings.toString());
 	}
 
+	/**
+	 * 「自然言語で検索」ボタンの動作
+	 */
 	public void searchNLPressed() {
 		String question = text.getText();
 		List<Link> query = NaturalLanguage.questionAnalysis(question);
@@ -146,13 +152,13 @@ class PaintPanel extends JPanel {
 	private Map<String, Point> pointTable;
 	private AIFrameSystem fs;
 	// 最大座標からの余白の長さ
-	final static int MARGIN = 100;
+	final static int MARGIN = 10;
 	// ウィンドウサイズwidth x height
 	private int width, height;
 
 	/**
 	 * フレームシステム用描画パネル コンストラクタ
-	 *
+	 * 
 	 * @param fs
 	 *            描画したいフレームシステム
 	 * @param pointTable
@@ -161,24 +167,13 @@ class PaintPanel extends JPanel {
 	public PaintPanel(AIFrameSystem fs, Map<String, Point> pointTable) {
 		this.fs = fs;
 		this.pointTable = pointTable;
-
 		// 描画サイズの決定
-		width = height = 0;
-		for (Point point : pointTable.values()) {
-			if (width < point.x)
-				width = point.x;
-			if (height < point.y)
-				height = point.y;
-		}
-		width += MARGIN;
-		height += MARGIN;
-		// サイズ指定
-		setPreferredSize(new Dimension(width, height));
+		setSize();
 	}
 
 	/**
 	 * 矢印を描く
-	 *
+	 * 
 	 * @param g
 	 *            対象のGraphicsオブジェクト
 	 * @param x1
@@ -211,74 +206,147 @@ class PaintPanel extends JPanel {
 	}
 
 	/**
+	 * 描画枠のサイズを決める
+	 */
+	public void setSize() {
+		width = height = 0;
+		if (pointTable != null) {
+			// 全てのフレームに対して
+			for (String frameName : pointTable.keySet()) {
+				// 座標取得
+				Point point1 = pointTable.get(frameName);
+				int y = point1.y + NEXT_LINE;
+				// 最大文字列幅
+				int maxStrWidth = stringWidth(frameName);
+				// 全てのスロットに対して
+				AIFrame frame = fs.getAIFrame(frameName);
+				for (String slotName : frame.getSlotNames(false)) {
+					// スロット値を取得
+					Object value = fs.readSlotValue(frameName, slotName);
+					// 表示文字列
+					String str = "";
+					// その文字列の幅
+					int strWidth = 0;
+					// AIFrameのインスタンスならば
+					if (value instanceof AIFrame) {
+						// スロット値のフレームの座標を取得
+						Point point2 = pointTable.get(((AIFrame) value)
+								.getName());
+						if (point2 != null) {
+							// スロット名と空欄
+							str = slotName + " [   ]";
+							y += NEXT_LINE;
+						}
+					} else {// AIFrameのインスタンスでないとき
+						// スロット名と値
+						str = slotName + " [" + value + "]";
+						y += NEXT_LINE;
+					}
+					// 文字列の幅を求める
+					strWidth = stringWidth(str);
+					// 最大文字列幅を更新
+					if (maxStrWidth < strWidth)
+						maxStrWidth = strWidth;
+				}
+				int w = point1.x + CHAR_WIDTH + maxStrWidth, h = y;
+				if (width < w)
+					width = w;
+				if (height < h)
+					height = h;
+			}
+		}
+		width += MARGIN;
+		height += MARGIN;
+		setPreferredSize(new Dimension(width, height));
+	}
+
+	/**
+	 * フレームを描画
+	 * 
+	 * @param g
+	 *            描画対象
+	 * @param frameName
+	 *            フレーム名
+	 */
+	public void drawFrame(Graphics g, String frameName) {
+		// フォント設定
+		g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));
+
+		// 座標取得
+		Point point1 = pointTable.get(frameName);
+		int x = point1.x, y = point1.y;
+
+		// フレーム名描画
+		g.setColor(Color.BLACK);
+		g.drawString(frameName, x, y);
+		y += NEXT_LINE;
+
+		// 最大文字列幅
+		int maxStrWidth = stringWidth(frameName);
+		// 全てのスロットに対して
+		AIFrame frame = fs.getAIFrame(frameName);
+		for (String slotName : frame.getSlotNames(false)) {
+			// スロット値を取得
+			Object value = fs.readSlotValue(frameName, slotName);
+			g.setColor(Color.BLUE);
+			// 表示文字列
+			String str = "";
+			// その文字列の幅
+			int strWidth = 0;
+			// AIFrameのインスタンスならば
+			if (value instanceof AIFrame) {
+				// スロット値のフレームの座標を取得
+				Point point2 = pointTable.get(((AIFrame) value).getName());
+				if (point2 != null) {
+					String blank = " [   ]";
+					// スロット名と空欄表示
+					str = slotName + blank;
+					g.drawString(str, x, y);
+					// 矢印を描画
+					g.setColor(Color.MAGENTA);
+					drawArrow(g, x + stringWidth(slotName) + stringWidth(blank)
+							/ 2, y - FONT_SIZE / 2, point2.x, point2.y);
+					// 描画位置更新
+					y += NEXT_LINE;
+				}
+			} else {// AIFrameのインスタンスでないとき
+				// スロット名と値を表示
+				str = slotName + " [" + value + "]";
+				g.drawString(str, x, y);
+				// 描画位置更新
+				y += NEXT_LINE;
+			}
+			// 文字列の幅を求める
+			strWidth = stringWidth(str);
+			// 最大文字列幅を更新
+			if (maxStrWidth < strWidth)
+				maxStrWidth = strWidth;
+		}
+		// フレームの枠を描画
+		g.setColor(Color.GRAY);
+		g.drawRect(point1.x - CHAR_WIDTH, point1.y - NEXT_LINE, maxStrWidth
+				+ CHAR_WIDTH * 2, y - point1.y + NEXT_LINE);
+	}
+
+	/**
 	 * 描画メソッド
 	 */
 	@Override
 	public void paintComponent(Graphics g) {
-		// フォント設定
-		g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, FONT_SIZE));
 		// 白で覆う
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, getWidth(), getHeight());
 		if (pointTable != null) {
 			// 全てのフレームに対して
 			for (String frameName : pointTable.keySet()) {
-				// 座標取得
-				Point point1 = pointTable.get(frameName);
-				int x = point1.x, y = point1.y;
-
-				// フレーム名描画
-				g.setColor(Color.BLACK);
-				g.drawString(frameName, x, y);
-				y += NEXT_LINE;
-
-				// 最大文字列幅
-				int maxStrWidth = stringWidth(frameName);
-				// 全てのスロットに対して
-				AIFrame frame = fs.getAIFrame(frameName);
-				for (String slotName : frame.getSlotNames()) {
-					// スロット値を取得
-					Object value = fs.readSlotValue(frameName, slotName);
-					g.setColor(Color.BLUE);
-					// 文字列幅
-					int strWidth = 0;
-					// AIFrameのインスタンスならば
-					if (value instanceof AIFrame) {
-						// スロット値のフレームの座標を取得
-						Point point2 = pointTable.get(((AIFrame) value).getName());
-						if (point2 != null) {
-							// スロット名と空欄表示
-							String str = slotName + " [   ]";
-							g.drawString(str, x, y);
-							// 文字列の幅を求める
-							strWidth = stringWidth(str);
-							// 矢印を描画
-							g.setColor(Color.MAGENTA);
-							drawArrow(g, x + strWidth - 3 * CHAR_WIDTH, y - 5, point2.x, point2.y);
-							y += NEXT_LINE;
-						}
-					} else {// AIFrameのインスタンスでないとき
-						// スロット名と値を表示
-						String str = slotName + " [" + value + "]";
-						g.drawString(str, x, y);
-						y += NEXT_LINE;
-						// 文字列の幅を求める
-						strWidth = stringWidth(str);
-					}
-					// 最大文字列幅を更新
-					if (maxStrWidth < strWidth)
-						maxStrWidth = strWidth;
-				}
-				// フレームの枠を描画
-				g.setColor(Color.GRAY);
-				g.drawRect(point1.x - 5, point1.y - NEXT_LINE, maxStrWidth + 10, y - point1.y + 5);
+				drawFrame(g, frameName);
 			}
 		}
 	}
 
 	/**
 	 * 文字列の幅を求める
-	 *
+	 * 
 	 * @param str
 	 *            文字列
 	 * @return 文字列の幅

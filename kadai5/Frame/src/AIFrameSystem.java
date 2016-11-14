@@ -1,10 +1,10 @@
-
 /*
  AIFrameSystem.java
-  フレームシステム
+ フレームシステム
  */
 
 import java.util.HashMap;
+import java.util.List;
 
 public class AIFrameSystem {
 
@@ -25,7 +25,7 @@ public class AIFrameSystem {
 	/**
 	 * createClassFrame<br>
 	 * クラスフレーム inName を作成する．
-	 *
+	 * 
 	 * @param inName
 	 *            クラスフレーム名
 	 */
@@ -36,7 +36,7 @@ public class AIFrameSystem {
 	/**
 	 * createClassFrame<br>
 	 * スーパーフレームとして inSuperName を持つクラスフレーム inName を作成する．
-	 *
+	 * 
 	 * @param inSuperName
 	 *            スーパーフレームのフレーム名
 	 * @param inName
@@ -49,7 +49,7 @@ public class AIFrameSystem {
 	/**
 	 * createInstanceFrame <br>
 	 * スーパーフレームとして inSuperName を持つインスタンスフレーム inName を作成する．
-	 *
+	 * 
 	 * @param inSuperName
 	 *            スーパーフレームのフレーム名
 	 * @param inName
@@ -62,13 +62,13 @@ public class AIFrameSystem {
 	/**
 	 * createFrame<br>
 	 * フレームを作成する
-	 *
+	 * 
 	 * @param inSuperName
 	 *            スーパーフレームのフレーム名
-	 *
+	 * 
 	 * @param inName
 	 *            フレーム名
-	 *
+	 * 
 	 * @param inIsInstance
 	 *            インスタンスフレームなら true
 	 */
@@ -84,17 +84,18 @@ public class AIFrameSystem {
 	/**
 	 * createFrame <br>
 	 * フレームを作成する
-	 *
+	 * 
 	 * @param inSuperName
 	 *            スーパーフレーム
-	 *
+	 * 
 	 * @param inName
 	 *            フレーム名
-	 *
+	 * 
 	 * @param inIsInstance
 	 *            インスタンスフレームなら true
 	 */
-	void createFrame(AIClassFrame inSuperFrame, String inName, boolean inIsInstance) {
+	void createFrame(AIClassFrame inSuperFrame, String inName,
+			boolean inIsInstance) {
 		AIFrame frame;
 		if (inIsInstance == true) {
 			frame = new AIInstanceFrame(this, inSuperFrame, inName);
@@ -107,7 +108,7 @@ public class AIFrameSystem {
 	/**
 	 * readSlotValue <br>
 	 * スロット値を返す
-	 *
+	 * 
 	 * @param inFrameName
 	 *            フレーム名
 	 * @param inSlotName
@@ -115,7 +116,8 @@ public class AIFrameSystem {
 	 * @param inDefault
 	 *            デフォルト値を優先したいなら true
 	 */
-	public Object readSlotValue(String inFrameName, String inSlotName, boolean inDefault) {
+	public Object readSlotValue(String inFrameName, String inSlotName,
+			boolean inDefault) {
 		AIFrame frame = (AIFrame) mFrames.get(inFrameName);
 		return frame.readSlotValue(this, inSlotName, inDefault);
 	}
@@ -123,7 +125,7 @@ public class AIFrameSystem {
 	/**
 	 * readSlotValue<br>
 	 * スロット値を返す
-	 *
+	 * 
 	 * @param inFrameName
 	 *            フレーム名
 	 * @param inSlotName
@@ -137,7 +139,7 @@ public class AIFrameSystem {
 	/**
 	 * readSlotValue<br>
 	 * スロット値を返す
-	 *
+	 * 
 	 * @param inFrameName
 	 *            フレーム名
 	 * @param inSlotName
@@ -145,7 +147,8 @@ public class AIFrameSystem {
 	 * @param inFacetName
 	 *            ファセット名
 	 */
-	public Object readSlotValue(String inFrameName, String inSlotName, String inFacetName) {
+	public Object readSlotValue(String inFrameName, String inSlotName,
+			String inFacetName) {
 		AIFrame frame = (AIFrame) mFrames.get(inFrameName);
 		return frame.readSlotValue(this, inSlotName, false);
 	}
@@ -153,7 +156,7 @@ public class AIFrameSystem {
 	/**
 	 * writeSlotValue<br>
 	 * スロット値を設定する．
-	 *
+	 * 
 	 * @param inFrameName
 	 *            フレーム名
 	 * @param inSlotName
@@ -161,7 +164,8 @@ public class AIFrameSystem {
 	 * @param inSlotValue
 	 *            スロット値
 	 */
-	public void writeSlotValue(String inFrameName, String inSlotName, Object inSlotValue) {
+	public void writeSlotValue(String inFrameName, String inSlotName,
+			Object inSlotValue) {
 		AIFrame frame = (AIFrame) mFrames.get(inFrameName);
 		frame.writeSlotValue(this, inSlotName, inSlotValue);
 	}
@@ -172,15 +176,18 @@ public class AIFrameSystem {
 	 * setWhenConstructedProc<br>
 	 * when-constructed procedure を設定する．
 	 */
-	public void setWhenConstructedProc(String inFrameName, String inSlotName, AIWhenConstructedProc inDemonProc) {
+	public void setWhenConstructedProc(String inFrameName, String inSlotName,
+			AIWhenConstructedProc inDemonProc) {
 		AIFrame frame = (AIFrame) mFrames.get(inFrameName);
 		if (frame != null)
 			frame.setWhenConstructedProc(inDemonProc);
 	}
 
-	public void setWhenConstructedProc(String inFrameName, String inSlotName, String inClassName) {
+	public void setWhenConstructedProc(String inFrameName, String inSlotName,
+			String inClassName) {
 		try {
-			AIWhenConstructedProc demonProc = (AIWhenConstructedProc) Class.forName(inClassName).newInstance();
+			AIWhenConstructedProc demonProc = (AIWhenConstructedProc) Class
+					.forName(inClassName).newInstance();
 			AIFrame frame = (AIFrame) mFrames.get(inFrameName);
 			if (frame != null)
 				frame.setWhenConstructedProc(demonProc);
@@ -193,43 +200,54 @@ public class AIFrameSystem {
 	 * setWhenRequestedProc<br>
 	 * when-requested procedure を設定する．
 	 */
-	public void setWhenRequestedProc(String inFrameName, String inSlotName, AIDemonProc inDemonProc) {
-		setDemonProc(AISlot.WHEN_REQUESTED, inFrameName, inSlotName, inDemonProc);
+	public void setWhenRequestedProc(String inFrameName, String inSlotName,
+			AIDemonProc inDemonProc) {
+		setDemonProc(AISlot.WHEN_REQUESTED, inFrameName, inSlotName,
+				inDemonProc);
 	}
 
-	public void setWhenRequestedProcClass(String inFrameName, String inSlotName, String inClassName) {
-		setDemonProcClass(AISlot.WHEN_REQUESTED, inFrameName, inSlotName, inClassName);
+	public void setWhenRequestedProcClass(String inFrameName,
+			String inSlotName, String inClassName) {
+		setDemonProcClass(AISlot.WHEN_REQUESTED, inFrameName, inSlotName,
+				inClassName);
 	}
 
 	/**
 	 * setWhenReadProc<br>
 	 * when-read procedure を設定する．
 	 */
-	public void setWhenReadProc(String inFrameName, String inSlotName, AIDemonProc inDemonProc) {
+	public void setWhenReadProc(String inFrameName, String inSlotName,
+			AIDemonProc inDemonProc) {
 		setDemonProc(AISlot.WHEN_READ, inFrameName, inSlotName, inDemonProc);
 	}
 
-	public void setWhenReadProcClass(String inFrameName, String inSlotName, String inClassName) {
-		setDemonProcClass(AISlot.WHEN_READ, inFrameName, inSlotName, inClassName);
+	public void setWhenReadProcClass(String inFrameName, String inSlotName,
+			String inClassName) {
+		setDemonProcClass(AISlot.WHEN_READ, inFrameName, inSlotName,
+				inClassName);
 	}
 
 	/**
 	 * setWhenWrittenProc<br>
 	 * when-written procedure を設定する．
 	 */
-	public void setWhenWrittenProc(String inFrameName, String inSlotName, AIDemonProc inDemonProc) {
+	public void setWhenWrittenProc(String inFrameName, String inSlotName,
+			AIDemonProc inDemonProc) {
 		setDemonProc(AISlot.WHEN_WRITTEN, inFrameName, inSlotName, inDemonProc);
 	}
 
-	public void setWhenWrittenProcClass(String inFrameName, String inSlotName, String inClassName) {
-		setDemonProcClass(AISlot.WHEN_WRITTEN, inFrameName, inSlotName, inClassName);
+	public void setWhenWrittenProcClass(String inFrameName, String inSlotName,
+			String inClassName) {
+		setDemonProcClass(AISlot.WHEN_WRITTEN, inFrameName, inSlotName,
+				inClassName);
 	}
 
 	/**
 	 * setDemonProc<br>
 	 * demon procedure を設定する．
 	 */
-	void setDemonProc(int inType, String inFrameName, String inSlotName, AIDemonProc inDemonProc) {
+	void setDemonProc(int inType, String inFrameName, String inSlotName,
+			AIDemonProc inDemonProc) {
 		AIFrame frame = (AIFrame) mFrames.get(inFrameName);
 		if (frame != null)
 			frame.setDemonProc(inType, inSlotName, inDemonProc);
@@ -239,9 +257,11 @@ public class AIFrameSystem {
 	 * setDemonClass<br>
 	 * demon procedure を設定する．
 	 */
-	void setDemonProcClass(int inType, String inFrameName, String inSlotName, String inClassName) {
+	void setDemonProcClass(int inType, String inFrameName, String inSlotName,
+			String inClassName) {
 		try {
-			AIDemonProc demon = (AIDemonProc) Class.forName(inClassName).newInstance();
+			AIDemonProc demon = (AIDemonProc) Class.forName(inClassName)
+					.newInstance();
 			setDemonProc(inType, inFrameName, inSlotName, demon);
 		} catch (Exception err) {
 			System.out.println(err);
@@ -250,7 +270,7 @@ public class AIFrameSystem {
 
 	/**
 	 * 名前に対するフレームを取得
-	 *
+	 * 
 	 * @param name
 	 *            フレーム名
 	 * @return フレーム
