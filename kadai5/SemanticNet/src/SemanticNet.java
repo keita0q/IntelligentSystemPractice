@@ -1,8 +1,11 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.StringTokenizer;
 
 /***
  * 意味ネットワーク (Semantic Net)
- * 
+ *
  */
 public class SemanticNet {
 	ArrayList<Link> links;
@@ -17,7 +20,7 @@ public class SemanticNet {
 
 	/**
 	 * 質問の表示と解の表示
-	 * 
+	 *
 	 * @param theQueries
 	 *            質問のリスト
 	 */
@@ -31,7 +34,7 @@ public class SemanticNet {
 
 	/**
 	 * 質問をする
-	 * 
+	 *
 	 * @param theQueries
 	 *            質問のリスト
 	 * @return 変数束縛情報のリスト(解のリスト)
@@ -53,7 +56,7 @@ public class SemanticNet {
 
 	/**
 	 * 単体の質問をする
-	 * 
+	 *
 	 * @param theQuery
 	 *            質問
 	 * @return 変数束縛情報
@@ -65,8 +68,7 @@ public class SemanticNet {
 			HashMap<String, String> binding = new HashMap<String, String>();
 			String theQueryString = theQuery.getFullName();
 			String theLinkString = theLink.getFullName();
-			if ((new Matcher())
-					.matching(theQueryString, theLinkString, binding)) {
+			if ((new Matcher()).matching(theQueryString, theLinkString, binding)) {
 				bindings.add(binding);
 			}
 		}
@@ -75,7 +77,7 @@ public class SemanticNet {
 
 	/**
 	 * 変数束縛情報のリストを全て結合する
-	 * 
+	 *
 	 * @param theBindingsList
 	 *            変数束縛情報のリスト
 	 * @return 結合後の変数束縛情報のリスト
@@ -104,7 +106,7 @@ public class SemanticNet {
 
 	/**
 	 * 変数束縛情報のリストを結合する
-	 * 
+	 *
 	 * @param theBindings1
 	 *            変数束縛情報のリスト1
 	 * @param theBindings2
@@ -116,10 +118,8 @@ public class SemanticNet {
 		for (int i = 0; i < theBindings1.size(); i++) {
 			HashMap<String, String> theBinding1 = (HashMap) theBindings1.get(i);
 			for (int j = 0; j < theBindings2.size(); j++) {
-				HashMap<String, String> theBinding2 = (HashMap) theBindings2
-						.get(j);
-				HashMap<String, String> resultBinding = joinBinding(
-						theBinding1, theBinding2);
+				HashMap<String, String> theBinding2 = (HashMap) theBindings2.get(j);
+				HashMap<String, String> resultBinding = joinBinding(theBinding1, theBinding2);
 				if (resultBinding.size() != 0) {
 					resultBindings.add(resultBinding);
 				}
@@ -130,15 +130,14 @@ public class SemanticNet {
 
 	/**
 	 * 変数束縛情報を結合する
-	 * 
+	 *
 	 * @param theBinding1
 	 *            変数束縛情報1
 	 * @param theBinding2
 	 *            変数束縛情報2
 	 * @return 結合後の変数束縛情報
 	 */
-	public HashMap<String, String> joinBinding(
-			HashMap<String, String> theBinding1,
+	public HashMap<String, String> joinBinding(HashMap<String, String> theBinding1,
 			HashMap<String, String> theBinding2) {
 		HashMap<String, String> resultBinding = new HashMap<String, String>();
 		// System.out.println(theBinding1.toString() + "<->" +
@@ -170,7 +169,7 @@ public class SemanticNet {
 	 * セマンティックネットにリンクを加える<br>
 	 * 例: Ito =is-a=> NIT-student:<br>
 	 * tail : Ito, head : NIT-student, label: is-a.
-	 * 
+	 *
 	 * @param theLink
 	 *            加えるリンク
 	 */
@@ -198,22 +197,20 @@ public class SemanticNet {
 
 	/**
 	 * 再帰的に継承を行う
-	 * 
+	 *
 	 * @param theInheritLinks
 	 *            継承すべきリンク
 	 * @param theInheritNodes
 	 *            継承すべきリンクを継承するノード
 	 */
-	public void recursiveInheritance(ArrayList<Link> theInheritLinks,
-			ArrayList<Node> theInheritNodes) {
+	public void recursiveInheritance(ArrayList<Link> theInheritLinks, ArrayList<Node> theInheritNodes) {
 		for (int i = 0; i < theInheritNodes.size(); i++) {
 			Node theNode = (Node) theInheritNodes.get(i);
 			// theNode 自体にリンクを継承．
 			for (int j = 0; j < theInheritLinks.size(); j++) {
 				// theNode を tail にしたリンクを生成
 				Link theLink = (Link) theInheritLinks.get(j);
-				Link newLink = new Link(theLink.getLabel(), theNode.getName(),
-						(theLink.getHead()).getName(), this);
+				Link newLink = new Link(theLink.getLabel(), theNode.getName(), (theLink.getHead()).getName(), this);
 				newLink.setInheritance(true);
 				links.add(newLink);
 				theNode.addDepartFromMeLinks(newLink);
@@ -261,8 +258,7 @@ class Matcher {
 		vars = new HashMap<String, String>();
 	}
 
-	public boolean matching(String string1, String string2,
-			HashMap<String, String> bindings) {
+	public boolean matching(String string1, String string2, HashMap<String, String> bindings) {
 		this.vars = bindings;
 		if (matching(string1, string2)) {
 			return true;

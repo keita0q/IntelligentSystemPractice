@@ -1,3 +1,4 @@
+
 /*
  AIDemonProcReadTest.java
   すべての種類のデモン手続きのスーパークラス
@@ -6,12 +7,12 @@
   返さなけらばならない
  */
 
-import java.util.*;
+import java.util.Iterator;
 
 class AIDemonProcReadTest extends AIDemonProc {
 
-	public Object eval(AIFrameSystem inFrameSystem, AIFrame inFrame,
-			String inSlotName, Iterator inSlotValues, Object inOpts) {
+	public Object eval(AIFrameSystem inFrameSystem, AIFrame inFrame, String inSlotName, Iterator inSlotValues,
+			Object inOpts) {
 		Object height = inFrame.readSlotValue(inFrameSystem, "height", false);
 		if (height instanceof Integer) {
 			int h = ((Integer) height).intValue();

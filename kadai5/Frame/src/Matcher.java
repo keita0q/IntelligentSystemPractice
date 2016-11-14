@@ -13,14 +13,9 @@ public class Matcher {
 		vars = new HashMap<String, String>();
 	}
 
-	public boolean matching(String string1, String string2,
-			HashMap<String, String> bindings) {
+	public boolean matching(String string1, String string2, HashMap<String, String> bindings) {
 		this.vars = bindings;
-		if (matching(string1, string2)) {
-			return true;
-		} else {
-			return false;
-		}
+		return matching(string1, string2);
 	}
 
 	public boolean matching(String string1, String string2) {
@@ -64,11 +59,7 @@ public class Matcher {
 
 	boolean varMatching(String vartoken, String token) {
 		if (vars.containsKey(vartoken)) {
-			if (token.equals(vars.get(vartoken))) {
-				return true;
-			} else {
-				return false;
-			}
+			return token.equals(vars.get(vartoken));
 		} else {
 			vars.put(vartoken, token);
 		}
@@ -79,5 +70,4 @@ public class Matcher {
 		// 先頭が ? なら変数
 		return str1.startsWith("?");
 	}
-
 }

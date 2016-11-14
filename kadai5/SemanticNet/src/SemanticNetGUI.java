@@ -130,11 +130,13 @@ class PaintPanel extends JPanel {
 	 *
 	 */
 	public static void drawDottedLine(Graphics g, int x1, int y1, int x2, int y2) {
+		// 方向ベクトル
 		double dx = (x2 - x1), dy = (y2 - y1);
 		double length = Math.sqrt(dx * dx + dy * dy);
+		// BLANK_SIZEのベクトルにする
 		dx = (dx / length) * BLANK_SIZE;
 		dy = (dy / length) * BLANK_SIZE;
-
+		// (x1, y1)から2(dx, dy)ごとに(dx, dy)だけ描画
 		for (double x = x1, y = y1; ((x - x2) * (x - x2) + (y - y2) * (y - y2)) > BLANK_SIZE * BLANK_SIZE; x += 2
 				* dx, y += 2 * dy) {
 			g.drawLine((int) x, (int) y, (int) (x + dx), (int) (y + dy));
@@ -149,16 +151,23 @@ class PaintPanel extends JPanel {
 		// 白で覆う
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, getWidth(), getHeight());
+		// 各ノードに対して
 		for (Node node : sn.getNodes()) {
+			// 座標取得
 			Point point = pointTable.get(node.getName());
 			if (point != null) {
+				// 自分から出るリンクに対して
 				for (Link link : node.getDepartFromMeLinks()) {
+					// 矢印の先端の座標を求める
 					Point pointTail = pointTable.get(link.getHead().getName());
+					// 矢印描画
 					g.setColor(Color.MAGENTA);
 					drawArrow(g, point.x, point.y, pointTail.x, pointTail.y, link.inheritance);
+					// リンク名描画
 					g.setColor(Color.BLUE);
 					g.drawString(link.getLabel(), (point.x + pointTail.x) / 2, (point.y + pointTail.y) / 2);
 				}
+				// ノード名描画
 				g.setColor(Color.BLACK);
 				g.drawString(node.getName(), point.x + 10, point.y + 10);
 				g.fillRect(point.x, point.y, 5, 5);

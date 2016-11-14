@@ -2,15 +2,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 自然言語処理に関連するクラス
- * 
+ *
  * @author Yoshida
- * 
+ *
  */
 public class NaturalLanguage {
+	public static final String NAME = "?name";
+	public static final String VALUE = "?value";
 
 	/**
 	 * 自然言語の質問文から聞いていることを取り出す<br>
@@ -19,7 +20,7 @@ public class NaturalLanguage {
 	 * "slotがvalueなものは何?" -> return [(?name, slot, value)] <br>
 	 * "slot1がvalue1で、slot2がvalue2なclassは何?" -> return <br>
 	 * [(?name, slot1, value1), (?name, slot2, value2), (?name, is-a, class)]
-	 * 
+	 *
 	 * @param question
 	 *            自然言語の質問文
 	 * @return 質問のリスト
@@ -62,26 +63,24 @@ public class NaturalLanguage {
 									} else {
 										// 助詞が「の」のとき
 										if (particle.equals("の")) {
-											query.add(new Link(noun1, noun2,
-													"?value"));
+											query.add(new Link(noun1, noun2, VALUE));
 											return query;
 										}
-										query.add(new Link("?name", noun1,
-												noun2));
+										query.add(new Link(NAME, noun1, noun2));
 										break;
 									}
 								}
 							} else if (particle.equals("は")) {
 								// 助詞が「は」のとき
-								query.add(new Link("?name", "is-a", noun1));
+								query.add(new Link(NAME, "is-a", noun1));
 							}
 						} else if (morph.isMark() && particle.equals("は")) {
 							// 助詞が「は」のとき
-							query.add(new Link("?name", "is-a", noun1));
+							query.add(new Link(NAME, "is-a", noun1));
 						}
 					} else if (particle.equals("は")) {
 						// 次の要素がなく、助詞が「は」のとき
-						query.add(new Link("?name", "is-a", noun1));
+						query.add(new Link(NAME, "is-a", noun1));
 					}
 				}
 			}
@@ -91,22 +90,39 @@ public class NaturalLanguage {
 
 	/**
 	 * 求めた結果を自然言語へ変換(questionAnalysisからの結果を想定)
-	 * 
+	 *
 	 * @param bindings
 	 *            変数束縛情報のリスト
 	 * @return 自然言語の応答文
 	 */
-	public static String toNL(List<Map<String, String>> bindings) {
+	public static String toNL(List<Link> query, List<Map<String, String>> bindings) {
 		if (bindings.isEmpty())
 			return "そのようなものは存在しません。";
-
 		String answer = "";
-		for (Map<String, String> binding : bindings) {
-			for (String ans : binding.values()) {
-				answer += ans + "と";
+		if (query.get(0).getValue().equals(VALUE)) {
+			// VALUEが聞かれているとき
+			answer = query.get(0).getFrame() + "の" + query.get(0).getSlot() + "は";
+			for (Map<String, String> binding : bindings)
+				answer += binding.get(VALUE) + "と";
+			answer = answer.substring(0, answer.length() - 1) + "です。";
+		} else {
+			// NAMEが聞かれているとき
+			String isa = "もの";
+			for (Link link : query) {
+				if (link.getSlot().equals("is-a")) {
+					// is-aを記録
+					isa = link.getValue();
+					continue;
+				}
+				answer += link.getSlot() + "が" + link.getValue() + "で、";
 			}
+			if (!answer.isEmpty())
+				answer = (answer.substring(0, answer.length() - 1) + "ある");
+			answer += isa + "は";
+			for (Map<String, String> binding : bindings)
+				answer += binding.get(NAME) + "と";
+			answer = answer.substring(0, answer.length() - 1) + "です。";
 		}
-		answer = answer.substring(0, answer.length() - 1) + "です。";
 		return answer;
 	}
 }

@@ -1,10 +1,12 @@
+
 /*
  AISlot.java
 
   フレームにおけるスロットを実現するクラス．
  */
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 class AISlot {
 

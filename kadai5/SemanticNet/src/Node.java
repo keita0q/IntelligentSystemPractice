@@ -1,4 +1,4 @@
-import java.util.*;
+import java.util.ArrayList;
 
 class Node {
 	String name;
@@ -16,7 +16,7 @@ class Node {
 
 	/**
 	 * このノードに入ってくるis-aのノードをリストを取得する
-	 * 
+	 *
 	 * @return このノードに入ってくるis-aのノードのリスト
 	 */
 	public ArrayList<Node> getISATails() {

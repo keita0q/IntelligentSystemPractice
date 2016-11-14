@@ -4,6 +4,7 @@
  * @author Yoshida
  */
 public class Link {
+	// フレーム名、スロット名、スロット値の文字列
 	String frame, slot, value;
 
 	public Link(String frame, String slot, String value) {

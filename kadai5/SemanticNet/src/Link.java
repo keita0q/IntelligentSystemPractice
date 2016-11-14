@@ -1,4 +1,5 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Link {
 	String label;
@@ -8,7 +9,7 @@ public class Link {
 
 	/**
 	 * セマンティックネットへのリンク作成用コンストラクタ
-	 * 
+	 *
 	 * @param theLabel
 	 *            リンクの関係名
 	 * @param theTail
@@ -42,7 +43,7 @@ public class Link {
 	// For constructing query.
 	/**
 	 * 質問リンク作成用コンストラクタ
-	 * 
+	 *
 	 * @param theLabel
 	 *            リンクの関係名
 	 * @param theTail
@@ -78,8 +79,7 @@ public class Link {
 	}
 
 	public String toString() {
-		String result = tail.getName() + "  =" + label + "=>  "
-				+ head.getName();
+		String result = tail.getName() + "  =" + label + "=>  " + head.getName();
 		if (!inheritance) {
 			return result;
 		} else {
