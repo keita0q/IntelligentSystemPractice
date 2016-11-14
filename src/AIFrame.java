@@ -413,20 +413,6 @@ abstract class AIFrame {
     }
 
 
-    /**
-     * @return フレーム名を返す
-     */
-    //西が追加したところ
-    public String getmName() {
-        return this.mName;
-    }
-
-    //西が追加
-    public HashMap getmSlots() {
-        return mSlots;
-    }
-
-
     /*
      * getSlot
      *  スロット名が inSlotName であるスロットを返す．
