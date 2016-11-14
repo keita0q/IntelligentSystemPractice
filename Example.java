@@ -6,7 +6,7 @@ import java.util.Map;
 
 */
 
-public class Example {
+public class Group8Frame {
 
  public static void main(String args[]) {
   System.out.println( "Frame" );
