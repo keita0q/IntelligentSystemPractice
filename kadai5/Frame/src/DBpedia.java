@@ -12,14 +12,14 @@ import java.util.Map;
 
 /**
  * DBpediaを利用して質問に答える
- *
+ * 
  * @author Yoshida
  */
 public class DBpedia {
 
 	/**
 	 * sparqlのクエリへ変換
-	 *
+	 * 
 	 * @param query
 	 *            質問のリスト
 	 * @return sparqlのクエリ
@@ -28,7 +28,8 @@ public class DBpedia {
 		String sparql = "SELECT DISTINCT * WHERE { ";
 
 		for (Link link : query) {
-			String frame = link.getFrame(), slot = link.getSlot(), value = link.getValue();
+			String frame = link.getFrame(), slot = link.getSlot(), value = link
+					.getValue();
 			if (slot.equals("is-a") || slot.equals("ako"))
 				continue;
 			String row = "{";
@@ -45,7 +46,8 @@ public class DBpedia {
 			if (value.startsWith("?") || isNumber(value)) {
 				row += value + " }";
 			} else {
-				row = row + "\"" + value + "\"@ja } UNION " + row + "<http://ja.dbpedia.org/resource/" + value + "> }";
+				row = row + "\"" + value + "\"@ja } UNION " + row
+						+ "<http://ja.dbpedia.org/resource/" + value + "> }";
 			}
 			sparql += row;
 		}
@@ -55,7 +57,7 @@ public class DBpedia {
 
 	/**
 	 * 文字列が数値かどうか
-	 *
+	 * 
 	 * @param str
 	 *            対象文字列
 	 * @return 数値の場合true
@@ -71,7 +73,7 @@ public class DBpedia {
 
 	/**
 	 * DBpediaへ問い合わせる
-	 *
+	 * 
 	 * @param query
 	 *            質問のリスト
 	 * @return 変数束縛情報のリスト
@@ -83,8 +85,9 @@ public class DBpedia {
 		String searchURL = "";
 		try {
 			searchURL = "http://ja.dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fja.dbpedia.org&timeout=0&debug=on"
-					+ "&format=" + URLEncoder.encode(format, "UTF-8") + "&query="
-					+ URLEncoder.encode(sparqlQuery, "UTF-8");
+					+ "&format="
+					+ URLEncoder.encode(format, "UTF-8")
+					+ "&query=" + URLEncoder.encode(sparqlQuery, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 		}
 		String result = getWebContent(searchURL, "UTF-8"); // SPARQL検索結果を得る
@@ -96,7 +99,7 @@ public class DBpedia {
 
 	/**
 	 * csv形式の文字列からマップのリストへ変換
-	 *
+	 * 
 	 * @param csv
 	 *            csv形式の文字列
 	 * @return マップのリストへ変換
@@ -117,7 +120,7 @@ public class DBpedia {
 
 	/**
 	 * 与えられたURLからHTML等のコンテンツを取得し，返す．
-	 *
+	 * 
 	 * @param url
 	 *            取得するコンテンツのURL
 	 * @param enc
@@ -128,8 +131,10 @@ public class DBpedia {
 		StringBuffer sb = new StringBuffer();
 		try {
 			URLConnection conn = new URL(url).openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), enc));
-			for (String line = in.readLine(); line != null; line = in.readLine()) {
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					conn.getInputStream(), enc));
+			for (String line = in.readLine(); line != null; line = in
+					.readLine()) {
 				sb.append(line);
 				sb.append("\n");
 			}
@@ -142,28 +147,31 @@ public class DBpedia {
 	/**
 	 * nameからリダイレクトするアドレスを求める<br>
 	 * リダイレクト先が無いときは、そのままのアドレスを返す
-	 *
+	 * 
 	 * @param name
 	 *            調べたい名称
 	 * @return リダイレクト先のアドレス
 	 */
 	public static String pageRedirects(String name) {
 		// nameからリダイレクトするページのURL
-		String sparqlQuery = "SELECT DISTINCT * WHERE {<http://ja.dbpedia.org/resource/" + name
+		String sparqlQuery = "SELECT DISTINCT * WHERE {<http://ja.dbpedia.org/resource/"
+				+ name
 				+ "> <http://dbpedia.org/ontology/wikiPageRedirects> ?x. } LIMIT 10";
 		String format = "text/csv"; // 受け取る検索結果のフォーマットにcsvを指定
 		// SPARQL検索のURL
 		String searchURL = "";
 		try {
 			searchURL = "http://ja.dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fja.dbpedia.org&timeout=0&debug=on"
-					+ "&format=" + URLEncoder.encode(format, "UTF-8") + "&query="
-					+ URLEncoder.encode(sparqlQuery, "UTF-8");
+					+ "&format="
+					+ URLEncoder.encode(format, "UTF-8")
+					+ "&query=" + URLEncoder.encode(sparqlQuery, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 		}
 		String result = getWebContent(searchURL, "UTF-8");// SPARQL検索結果を得る
 		try {
 			String address = result.split("\n")[1].replace("\"", "");
-			return (address.isEmpty()) ? "http://ja.dbpedia.org/resource/" + name : address;
+			return (address.isEmpty()) ? "http://ja.dbpedia.org/resource/"
+					+ name : address;
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return "http://ja.dbpedia.org/resource/" + name;
 		}

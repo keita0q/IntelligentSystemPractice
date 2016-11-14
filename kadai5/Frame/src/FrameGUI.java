@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
@@ -36,6 +36,7 @@ public class FrameGUI extends JFrame implements ActionListener {
 	JButton search, searchNL;
 	JTextArea info;
 	JScrollPane infoScroll;
+	AIFrameSystem fs;
 
 	/**
 	 * フレームGUIコンストラクタ
@@ -47,6 +48,7 @@ public class FrameGUI extends JFrame implements ActionListener {
 	 */
 	public FrameGUI(AIFrameSystem fs, Map<String, Point> pointTable) {
 		super("AIFrameGUI");
+		this.fs = fs;
 		paintPanel = new PaintPanel(fs, pointTable);
 
 		text = new JTextField(30);
@@ -80,7 +82,7 @@ public class FrameGUI extends JFrame implements ActionListener {
 	 */
 	public List<Link> getQuery() {
 		Pattern regex = Pattern.compile("\"(.*?)\""); // ""内を取り出す正規表現
-		Matcher matcher = regex.matcher(text.getText());// 入力されたテキストを解析
+		java.util.regex.Matcher matcher = regex.matcher(text.getText());// 入力されたテキストを解析
 		List<Link> query = new ArrayList<>();// ""で囲まれた部分を保存するリスト
 		try {
 			if (matcher.find()) {// ""で囲まれた部分があったとき
@@ -105,10 +107,12 @@ public class FrameGUI extends JFrame implements ActionListener {
 		List<Link> query = getQuery();
 		if (query.isEmpty())
 			return;
-		// *************ここで課題5-3のメソッドを呼ぶ************
+		List<Map<String, String>> bindings = fs.doQuery(query);
 		// 課題5-3で答えられない場合、DBpediaを利用する
-		// DBpediaの利用
-		List<Map<String, String>> bindings = DBpedia.query(query);
+		if (bindings.isEmpty()) {
+			// DBpediaの利用
+			bindings = DBpedia.query(query);
+		}
 		info.setText(bindings.toString());
 	}
 
@@ -121,10 +125,12 @@ public class FrameGUI extends JFrame implements ActionListener {
 		System.out.println(query);
 		if (query.isEmpty())
 			return;
-		// *************ここで課題5-3のメソッドを呼ぶ************
+		List<Map<String, String>> bindings = fs.doQuery(query);
 		// 課題5-3で答えられない場合、DBpediaを利用する
-		// DBpediaの利用
-		List<Map<String, String>> bindings = DBpedia.query(query);
+		if (bindings.isEmpty()) {
+			// DBpediaの利用
+			bindings = DBpedia.query(query);
+		}
 		info.setText(NaturalLanguage.toNL(bindings));
 	}
 

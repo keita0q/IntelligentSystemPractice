@@ -384,12 +384,19 @@ abstract class AIFrame {
 		return set;
 	}
 
+	/**
+	 * このフレームのスーパークラス(再帰的)の名前の集合を返す
+	 * 
+	 * @return スーパークラス(再帰的)の名前の集合
+	 */
 	public Set<String> getSuperNames() {
 		Set<String> set = new HashSet<>();
 		for (Iterator<AIFrame> it = getSupers(); it != null && it.hasNext();) {
-			set.addAll(it.next().getSuperNames());
+			AIFrame sup = it.next();
+			set.add(sup.getName());
+			set.addAll(sup.getSuperNames());
 		}
+		set.remove("top_level_frame");
 		return set;
 	}
-
 } // end of class definition

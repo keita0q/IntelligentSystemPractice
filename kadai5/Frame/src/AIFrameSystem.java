@@ -3,8 +3,13 @@
  フレームシステム
  */
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 public class AIFrameSystem {
 
@@ -279,4 +284,114 @@ public class AIFrameSystem {
 		return mFrames.get(name);
 	}
 
+	public List<Map<String, String>> query(Link aQuestion) {
+		List<Map<String, String>> tResuls = new ArrayList<>();
+		Matcher tMather = new Matcher();
+		// フレームで回す
+		for (String tFrameName : mFrames.keySet()) {
+			// スロットで回す
+			for (String tSlotName : mFrames.get(tFrameName).getSlotNames(true)) {
+				Object tValue = readSlotValue(tFrameName, tSlotName);
+				if (tValue instanceof AIFrame) {
+					if (tSlotName.equals("is-a") || tSlotName.equals("ako")) {
+						for (String tSuperName : mFrames.get(tFrameName)
+								.getSuperNames()) {
+							HashMap<String, String> tHashMap = new HashMap<>();
+							if (tMather.matching(
+									aQuestion.getFrame() + " "
+											+ aQuestion.getSlot() + " "
+											+ aQuestion.getValue(), tFrameName
+											+ " " + tSlotName + " "
+											+ tSuperName, tHashMap)) {
+								tResuls.add(tHashMap);
+							}
+						}
+					} else {
+						HashMap<String, String> tHashMap = new HashMap<>();
+						if (tMather.matching(
+								aQuestion.getFrame() + " "
+										+ aQuestion.getSlot() + " "
+										+ aQuestion.getValue(), tFrameName
+										+ " " + tSlotName + " "
+										+ ((AIFrame) tValue).getName(),
+								tHashMap)) {
+							tResuls.add(tHashMap);
+						}
+					}
+				} else {
+					HashMap<String, String> tHashMap = new HashMap<>();
+					if (tMather.matching(
+							aQuestion.getFrame() + " " + aQuestion.getSlot()
+									+ " " + aQuestion.getValue(), tFrameName
+									+ " " + tSlotName + " " + tValue, tHashMap)) {
+						tResuls.add(tHashMap);
+					}
+				}
+			}
+		}
+		return tResuls;
+	}
+
+	/**
+	 * 質問をする
+	 * 
+	 * @param tQueries
+	 *            質問のリスト
+	 * @return 変数束縛情報のリスト(解のリスト)
+	 */
+	public List<Map<String, String>> doQuery(List<Link> tQueries) {
+		List<Map<String, String>> tMergeList = new ArrayList<>();
+		boolean tFirstFlag = true;
+		for (Link tQuery : tQueries) {
+			List<Map<String, String>> tBindings = query(tQuery);
+			if (tBindings.size() != 0) {
+				if (tFirstFlag) {
+					tMergeList = tBindings;
+					tFirstFlag = false;
+				} else {
+					tMergeList = join(tMergeList, tBindings);
+				}
+			} else {
+				// 失敗したとき
+				return (new ArrayList<>());
+			}
+		}
+		return tMergeList;
+	}
+
+	/**
+	 * 関係データベースのJOIN演算に相当する(2つの変数束縛情報のリストを結合する)
+	 * 
+	 * @param array1
+	 *            変数束縛情報のリスト
+	 * @param array2
+	 *            変数束縛情報のリスト
+	 * @return 結合された変数束縛情報のリスト
+	 */
+	public static List<Map<String, String>> join(
+			List<Map<String, String>> array1, List<Map<String, String>> array2) {
+		// 空のリストを用意
+		List<Map<String, String>> merge = new ArrayList<>();
+		// それぞれのタプルに対する2重ループ
+		for (Map<String, String> hash1 : array1) {
+			for (Map<String, String> hash2 : array2) {
+				Map<String, String> hash = new HashMap<>(hash1);// hash1をコピー
+				boolean add = true;// hashを追加すべきかどうか
+				for (String key : hash2.keySet()) {// hash2のキーに対して
+					if (hash1.containsKey(key)) {// hash1にそのキーが存在する時
+						if (!hash2.get(key).equals(hash1.get(key))) {// 値が同じでないなら
+							add = false;// 追加しない
+							break;
+						}
+					} else {// hash1に存在しないキーのとき
+						hash.put(key, hash2.get(key));// hashに追加
+					}
+				}
+				if (add) {// 追加すべき時
+					merge.add(hash);// 結合されたタプルを追加
+				}
+			}
+		}
+		return merge;
+	}
 } // end of class definition
