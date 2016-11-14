@@ -95,7 +95,6 @@ public class FrameGUI extends JFrame implements ActionListener {
 				query.add(new Link(split[0], split[1], split[2]));// 全体を追加
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
-			info.setText("入力形式が正しくありません。");
 		}
 		return query;
 	}
@@ -105,8 +104,10 @@ public class FrameGUI extends JFrame implements ActionListener {
 	 */
 	public void searchPressed() {
 		List<Link> query = getQuery();
-		if (query.isEmpty())
+		if (query.isEmpty()) {
+			info.setText("入力形式が正しくありません。");
 			return;
+		}
 		List<Map<String, String>> bindings = fs.doQuery(query);
 		// 課題5-3で答えられない場合、DBpediaを利用する
 		if (bindings.isEmpty()) {
@@ -123,8 +124,10 @@ public class FrameGUI extends JFrame implements ActionListener {
 		String question = text.getText();
 		List<Link> query = NaturalLanguage.questionAnalysis(question);
 		System.out.println(query);
-		if (query.isEmpty())
+		if (query.isEmpty()) {
+			info.setText("自然言語を解析できませんでした。");
 			return;
+		}
 		List<Map<String, String>> bindings = fs.doQuery(query);
 		// 課題5-3で答えられない場合、DBpediaを利用する
 		if (bindings.isEmpty()) {

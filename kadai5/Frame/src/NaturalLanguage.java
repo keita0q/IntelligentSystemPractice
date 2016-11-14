@@ -6,9 +6,9 @@ import java.util.Set;
 
 /**
  * 自然言語処理に関連するクラス
- *
+ * 
  * @author Yoshida
- *
+ * 
  */
 public class NaturalLanguage {
 
@@ -19,7 +19,7 @@ public class NaturalLanguage {
 	 * "slotがvalueなものは何?" -> return [(?name, slot, value)] <br>
 	 * "slot1がvalue1で、slot2がvalue2なclassは何?" -> return <br>
 	 * [(?name, slot1, value1), (?name, slot2, value2), (?name, is-a, class)]
-	 *
+	 * 
 	 * @param question
 	 *            自然言語の質問文
 	 * @return 質問のリスト
@@ -62,10 +62,12 @@ public class NaturalLanguage {
 									} else {
 										// 助詞が「の」のとき
 										if (particle.equals("の")) {
-											query.add(new Link(noun1, noun2, "?value"));
+											query.add(new Link(noun1, noun2,
+													"?value"));
 											return query;
 										}
-										query.add(new Link("?name", noun1, noun2));
+										query.add(new Link("?name", noun1,
+												noun2));
 										break;
 									}
 								}
@@ -73,6 +75,9 @@ public class NaturalLanguage {
 								// 助詞が「は」のとき
 								query.add(new Link("?name", "is-a", noun1));
 							}
+						} else if (morph.isMark() && particle.equals("は")) {
+							// 助詞が「は」のとき
+							query.add(new Link("?name", "is-a", noun1));
 						}
 					} else if (particle.equals("は")) {
 						// 次の要素がなく、助詞が「は」のとき
@@ -86,7 +91,7 @@ public class NaturalLanguage {
 
 	/**
 	 * 求めた結果を自然言語へ変換(questionAnalysisからの結果を想定)
-	 *
+	 * 
 	 * @param bindings
 	 *            変数束縛情報のリスト
 	 * @return 自然言語の応答文
