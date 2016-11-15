@@ -22,8 +22,10 @@ public class Group8Frame {
   // クラスフレーム 学生 の生成
   fs.createClassFrame("人間", "学生");
   //クラスフレーム 課題 の生成
-  fs.createClassFrame( "課題" );
+  fs.createClassFrame( "課題");
 
+  //難易度スロットの追加(defaultで普通)
+  fs.writeSlotValue( "課題", "難易度","普通");
   // クラス 人間 インスタンスフレーム  の生成
   fs.createInstanceFrame( "学生","淺野" );
   fs.createInstanceFrame( "学生", "中村" );
@@ -49,11 +51,11 @@ public class Group8Frame {
   fs.writeSlotValue( "吉田", "担当", fs.getAIFrame("発展課題"));
  
 
-  fs.writeSlotValue( "課題5-1", "難易度","易"));
-  fs.writeSlotValue( "課題5-2", "難易度","易"));
-  fs.writeSlotValue( "課題5-3", "難易度","普通"));
-  fs.writeSlotValue( "課題5-4", "難易度","易"));
-  fs.writeSlotValue( "発展課題", "難易度","難"));
+  fs.writeSlotValue( "課題5-1", "難易度","易");
+  fs.writeSlotValue( "課題5-2", "難易度","易");
+  //fs.writeSlotValue( "課題5-3", "難易度","普通");
+  fs.writeSlotValue( "課題5-4", "難易度","易");
+  fs.writeSlotValue( "発展課題", "難易度","難");
 
 
   fs.writeSlotValue( "課題5-1", "担当者", fs.getAIFrame("水谷"));
