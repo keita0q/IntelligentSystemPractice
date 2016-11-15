@@ -34,7 +34,7 @@ public class Group8Frame {
 		fs.createInstanceFrame("学生", "水谷");
 		fs.createInstanceFrame("学生", "吉田");
 
-		// クラス 課題 インスタントフレーム の生成
+		// クラス 課題 インスタンスフレーム の生成
 		fs.createInstanceFrame("課題", "課題5-1");
 		fs.createInstanceFrame("課題", "課題5-2");
 		fs.createInstanceFrame("課題", "課題5-3");
