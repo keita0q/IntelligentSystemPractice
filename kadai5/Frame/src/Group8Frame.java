@@ -4,7 +4,7 @@ import java.util.Map;
 
 /**
  * グループ8のフレーム
- *
+ * 
  * @author Asano
  */
 public class Group8Frame {
@@ -13,6 +13,7 @@ public class Group8Frame {
 		System.out.println("Frame");
 
 		// フレームシステムの初期化
+
 		AIFrameSystem fs = new AIFrameSystem();
 
 		/* 課題用に変更 */
@@ -22,8 +23,10 @@ public class Group8Frame {
 
 		// クラスフレーム 学生 の生成
 		fs.createClassFrame("人間", "学生");
+
 		// クラスフレーム 課題 の生成
 		fs.createClassFrame("課題");
+		// 難易度スロットの追加(defaultで普通)
 		fs.writeSlotValue("課題", "難易度", "普通");
 
 		// クラス 人間 インスタンスフレーム の生成
@@ -34,7 +37,6 @@ public class Group8Frame {
 		fs.createInstanceFrame("学生", "吉田");
 
 		// クラス 課題 インスタントフレーム の生成
-
 		fs.createInstanceFrame("課題", "課題5-1");
 		fs.createInstanceFrame("課題", "課題5-2");
 		fs.createInstanceFrame("課題", "課題5-3");
@@ -49,6 +51,7 @@ public class Group8Frame {
 
 		fs.writeSlotValue("課題5-1", "難易度", "易");
 		fs.writeSlotValue("課題5-2", "難易度", "易");
+		// fs.writeSlotValue( "課題5-3", "難易度","普通");
 		fs.writeSlotValue("課題5-4", "難易度", "易");
 		fs.writeSlotValue("発展課題", "難易度", "難");
 
