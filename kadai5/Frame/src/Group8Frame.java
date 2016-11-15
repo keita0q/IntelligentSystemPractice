@@ -13,7 +13,6 @@ public class Group8Frame {
 		System.out.println("Frame");
 
 		// フレームシステムの初期化
-
 		AIFrameSystem fs = new AIFrameSystem();
 
 		/* 課題用に変更 */
@@ -23,12 +22,11 @@ public class Group8Frame {
 
 		// クラスフレーム 学生 の生成
 		fs.createClassFrame("人間", "学生");
-
 		// クラスフレーム 課題 の生成
 		fs.createClassFrame("課題");
+
 		// 難易度スロットの追加(defaultで普通)
 		fs.writeSlotValue("課題", "難易度", "普通");
-
 		// クラス 人間 インスタンスフレーム の生成
 		fs.createInstanceFrame("学生", "淺野");
 		fs.createInstanceFrame("学生", "中村");
