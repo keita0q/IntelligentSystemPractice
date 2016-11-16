@@ -8,6 +8,7 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -28,9 +29,9 @@ public class FrameGUI extends JFrame implements ActionListener {
 	PaintPanel paintPanel;// 描画パネル
 	JPanel commandPanel;
 	JTextField text;// 入力エリア
-	JButton searchButton;// 検索ボタン
+	JButton searchButton, clearButton;// 検索ボタン、クリアボタン
 	JTextArea infoArea;// 情報表示エリア
-	JScrollPane infoScroll;// infoにスクロールバーを付ける
+	JScrollPane infoScroll;// infoAreaにスクロールバーを付ける
 	AIFrameSystem fs; // フレームシステム
 	boolean nl;// 入力が自然言語かどうか
 
@@ -51,6 +52,8 @@ public class FrameGUI extends JFrame implements ActionListener {
 		text.setToolTipText("<html>質問を入力してください。<br>\"\"で囲むとパターンでの検索になります。<br>\"\"で囲まないと自然言語での検索になります。</html>");
 		searchButton = new JButton("検索");
 		searchButton.addActionListener(this);
+		clearButton = new JButton("クリア");
+		clearButton.addActionListener(this);
 		infoArea = new JTextArea(3, 30);
 		infoArea.setEditable(false);
 		infoArea.setBackground(Color.LIGHT_GRAY);
@@ -59,6 +62,7 @@ public class FrameGUI extends JFrame implements ActionListener {
 		commandPanel = new JPanel(new FlowLayout());
 		commandPanel.add(text);
 		commandPanel.add(searchButton);
+		commandPanel.add(clearButton);
 
 		setLayout(new BorderLayout());
 		add(commandPanel, BorderLayout.NORTH);
@@ -115,6 +119,13 @@ public class FrameGUI extends JFrame implements ActionListener {
 	}
 
 	/**
+	 * 「クリア」ボタンの動作
+	 */
+	public void clearPressed() {
+		text.setText("");
+	}
+
+	/**
 	 * ボタンが押されたときの動作を記述
 	 */
 	@Override
@@ -122,6 +133,8 @@ public class FrameGUI extends JFrame implements ActionListener {
 		Object obj = event.getSource();
 		if (obj == searchButton) {
 			searchPressed();
+		} else if (obj == clearButton) {
+			clearPressed();
 		}
 	}
 }
@@ -133,12 +146,15 @@ public class FrameGUI extends JFrame implements ActionListener {
  */
 class PaintPanel extends JPanel {
 	// 矢印の先端のヒゲと線の角度ANGLE、矢印の先端のヒゲのサイズHEAD_SIZE
-	final static double ANGLE = Math.PI / 9, HEAD_SIZE = 12;
+	final static double ANGLE = Math.PI / 8, HEAD_SIZE = 13;
 	final static int FONT_SIZE = 12;// フォントサイズ
 	final static int CHAR_WIDTH = FONT_SIZE / 2 + 1;// 文字幅
 	final static int NEXT_LINE = FONT_SIZE + 3;// 次の行までの距離
 	// ノード名に対する座標テーブル
-	private Map<String, Point> pointTable;
+	// 左上座標
+	private Map<String, Point> leftUp;
+	// 右下座標
+	private Map<String, Point> rightDown;
 	private AIFrameSystem fs;
 	// 最大座標からの余白の長さ
 	final static int MARGIN = 10;
@@ -155,9 +171,10 @@ class PaintPanel extends JPanel {
 	 */
 	public PaintPanel(AIFrameSystem fs, Map<String, Point> pointTable) {
 		this.fs = fs;
-		this.pointTable = pointTable;
-		// 描画サイズの決定
-		setSize();
+		this.leftUp = pointTable;
+		this.rightDown = new HashMap<>();
+		// 描画サイズなどの決定
+		init();
 	}
 
 	/**
@@ -195,16 +212,65 @@ class PaintPanel extends JPanel {
 	}
 
 	/**
-	 * 描画枠のサイズを決める
+	 * 点pがフレームnameの中にあるかどうか
+	 *
+	 * @param name
+	 *            対象のフレーム名
+	 * @param p
+	 *            点
+	 * @return 中にあるときtrue
 	 */
-	public void setSize() {
+	public boolean in(String name, Point p) {
+		// 左上座標
+		Point p1 = leftUp.get(name);
+		// 右下座標
+		Point p2 = rightDown.get(name);
+		return p1.x <= p.x && p.x <= p2.x && p1.y <= p.y && p.y <= p2.y;
+	}
+
+	/**
+	 * 点pとフレームnameの中心を結ぶ直線とフレームの枠の交点を求める
+	 *
+	 * @param name
+	 *            対象のフレーム名
+	 * @param p
+	 *            点
+	 * @return 交点
+	 */
+	public Point endPoint(String name, Point p) {
+		// 左上座標
+		Point p1 = leftUp.get(name);
+		// 右下座標
+		Point p2 = rightDown.get(name);
+		// 中点
+		double endX = (p1.x + p2.x) / 2.0, endY = (p1.y + p2.y) / 2.0;
+		// 中心から点pへのベクトル
+		double dx = p.x - endX, dy = p.y - endY;
+		double length = Math.sqrt(dx * dx + dy * dy);
+		// 大きさを1にする
+		dx /= length;
+		dy /= length;
+		// 交点crossを求める
+		Point cross = new Point((int) endX, (int) endY);
+		for (; in(name, cross); endX += dx, endY += dy) {
+			// フレームの中にある間ループ
+			cross.x = (int) endX;
+			cross.y = (int) endY;
+		}
+		return cross;
+	}
+
+	/**
+	 * 描画枠のサイズを決める、フレームの右下の座標を求める
+	 */
+	public void init() {
 		width = height = 0;
-		if (pointTable != null) {
+		if (leftUp != null) {
 			// 全てのフレームに対して
-			for (String frameName : pointTable.keySet()) {
-				// 座標取得
-				Point point1 = pointTable.get(frameName);
-				int y = point1.y + NEXT_LINE;
+			for (String frameName : leftUp.keySet()) {
+				// 左上座標取得
+				Point point1 = leftUp.get(frameName);
+				int x = point1.x + CHAR_WIDTH, y = point1.y + NEXT_LINE * 2;
 				// 最大文字列幅
 				int maxStrWidth = stringWidth(frameName);
 				// 全てのスロットに対して
@@ -218,16 +284,17 @@ class PaintPanel extends JPanel {
 					int strWidth = 0;
 					// AIFrameのインスタンスならば
 					if (value instanceof AIFrame) {
-						// スロット値のフレームの座標を取得
-						Point point2 = pointTable.get(((AIFrame) value).getName());
-						if (point2 != null) {
+						// 矢印描画先の座標が存在すれば
+						if (leftUp.containsKey(((AIFrame) value).getName())) {
 							// スロット名と空欄
 							str = slotName + " [   ]";
+							// 描画位置更新
 							y += NEXT_LINE;
 						}
 					} else {// AIFrameのインスタンスでないとき
 						// スロット名と値
 						str = slotName + " [" + value + "]";
+						// 描画位置更新
 						y += NEXT_LINE;
 					}
 					// 文字列の幅を求める
@@ -236,13 +303,18 @@ class PaintPanel extends JPanel {
 					if (maxStrWidth < strWidth)
 						maxStrWidth = strWidth;
 				}
-				int w = point1.x + CHAR_WIDTH + maxStrWidth, h = y;
+				// フレームの右下の座標を求める
+				int w = x + maxStrWidth + CHAR_WIDTH, h = y;
+				// 右下の座標を追加
+				rightDown.put(frameName, new Point(w, h));
+				// 座標の最大値を更新
 				if (width < w)
 					width = w;
 				if (height < h)
 					height = h;
 			}
 		}
+		// 余白を加える
 		width += MARGIN;
 		height += MARGIN;
 		setPreferredSize(new Dimension(width, height));
@@ -258,18 +330,17 @@ class PaintPanel extends JPanel {
 		// 白で覆う
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, getWidth(), getHeight());
-		if (pointTable != null) {
+		if (leftUp != null) {
 			// 全てのフレームに対して
-			for (String frameName : pointTable.keySet()) {
+			for (String frameName : leftUp.keySet()) {
 				// 座標取得
-				Point point1 = pointTable.get(frameName);
-				int x = point1.x, y = point1.y;
+				Point point1 = leftUp.get(frameName);
+				// 描画座標
+				int x = point1.x + CHAR_WIDTH, y = point1.y + NEXT_LINE;
 				// フレーム名描画
 				g.setColor(Color.BLACK);
 				g.drawString(frameName, x, y);
 				y += NEXT_LINE;
-				// 最大文字列幅
-				int maxStrWidth = stringWidth(frameName);
 				// 全てのスロットに対して
 				AIFrame frame = fs.getAIFrame(frameName);
 				for (String slotName : frame.getSlotNames(false)) {
@@ -278,21 +349,23 @@ class PaintPanel extends JPanel {
 					g.setColor(Color.BLUE);
 					// 表示文字列
 					String str = "";
-					// その文字列の幅
-					int strWidth = 0;
 					// AIFrameのインスタンスならば
 					if (value instanceof AIFrame) {
-						// スロット値のフレームの座標を取得
-						Point point2 = pointTable.get(((AIFrame) value).getName());
-						if (point2 != null) {
+						String name = ((AIFrame) value).getName();
+						// 矢印描画先の座標が存在すれば
+						if (leftUp.containsKey(name)) {
 							String blank = " [   ]";
 							// スロット名と空欄表示
 							str = slotName + blank;
 							g.drawString(str, x, y);
+							// 始点
+							Point start = new Point(x + stringWidth(slotName) + stringWidth(blank) / 2,
+									y - FONT_SIZE / 2);
+							// 終点
+							Point end = endPoint(name, start);
 							// 矢印を描画
-							g.setColor(Color.MAGENTA);
-							drawArrow(g, x + stringWidth(slotName) + stringWidth(blank) / 2, y - FONT_SIZE / 2,
-									point2.x, point2.y);
+							g.setColor(Color.RED);
+							drawArrow(g, start.x, start.y, end.x, end.y);
 							// 描画位置更新
 							y += NEXT_LINE;
 						}
@@ -303,16 +376,12 @@ class PaintPanel extends JPanel {
 						// 描画位置更新
 						y += NEXT_LINE;
 					}
-					// 文字列の幅を求める
-					strWidth = stringWidth(str);
-					// 最大文字列幅を更新
-					if (maxStrWidth < strWidth)
-						maxStrWidth = strWidth;
 				}
+				// フレームの右下座標取得
+				Point point2 = rightDown.get(frameName);
 				// フレームの枠を描画
 				g.setColor(Color.GRAY);
-				g.drawRect(point1.x - CHAR_WIDTH, point1.y - NEXT_LINE, maxStrWidth + CHAR_WIDTH * 2,
-						y - point1.y + NEXT_LINE);
+				g.drawRect(point1.x, point1.y, point2.x - point1.x, point2.y - point1.y);
 			}
 		}
 	}
