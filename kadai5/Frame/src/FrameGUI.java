@@ -237,25 +237,25 @@ class PaintPanel extends JPanel {
 	 *            点
 	 * @return 交点
 	 */
-	public Point endPoint(String name, Point p) {
+	public Point crossPoint(String name, Point p) {
 		// 左上座標
 		Point p1 = leftUp.get(name);
 		// 右下座標
 		Point p2 = rightDown.get(name);
 		// 中点
-		double endX = (p1.x + p2.x) / 2.0, endY = (p1.y + p2.y) / 2.0;
+		double midX = (p1.x + p2.x) / 2.0, midY = (p1.y + p2.y) / 2.0;
 		// 中心から点pへのベクトル
-		double dx = p.x - endX, dy = p.y - endY;
+		double dx = p.x - midX, dy = p.y - midY;
 		double length = Math.sqrt(dx * dx + dy * dy);
 		// 大きさを1にする
 		dx /= length;
 		dy /= length;
 		// 交点crossを求める
-		Point cross = new Point((int) endX, (int) endY);
-		for (; in(name, cross); endX += dx, endY += dy) {
+		Point cross = new Point((int) midX, (int) midY);
+		for (; in(name, cross); midX += dx, midY += dy) {
 			// フレームの中にある間ループ
-			cross.x = (int) endX;
-			cross.y = (int) endY;
+			cross.x = (int) midX;
+			cross.y = (int) midY;
 		}
 		return cross;
 	}
@@ -362,7 +362,7 @@ class PaintPanel extends JPanel {
 							Point start = new Point(x + stringWidth(slotName) + stringWidth(blank) / 2,
 									y - FONT_SIZE / 2);
 							// 終点
-							Point end = endPoint(name, start);
+							Point end = crossPoint(name, start);
 							// 矢印を描画
 							g.setColor(Color.RED);
 							drawArrow(g, start.x, start.y, end.x, end.y);
