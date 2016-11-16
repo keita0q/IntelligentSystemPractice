@@ -6,6 +6,7 @@
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -318,58 +319,107 @@ public class AIFrameSystem {
 	 * @author Nishi
 	 */
 	public List<Map<String, String>> doQuery(List<Link> tQueries) {
-		List<Map<String, String>> tMergeList = new ArrayList<>();
-		boolean tFirstFlag = true;
+		List<List<Map<String, String>>> bindingsList = new ArrayList<>();
 		for (Link tQuery : tQueries) {
-			List<Map<String, String>> tBindings = query(tQuery);
-			if (tBindings.size() != 0) {
-				if (tFirstFlag) {
-					tMergeList = tBindings;
-					tFirstFlag = false;
-				} else {
-					tMergeList = join(tMergeList, tBindings);
-				}
+			List<Map<String, String>> bindings = query(tQuery);
+			if (bindings.size() != 0) {
+				bindingsList.add(bindings);
 			} else {
 				// 失敗したとき
 				return (new ArrayList<>());
 			}
 		}
-		return tMergeList;
+		return join(bindingsList);
 	}
 
 	/**
-	 * 関係データベースのJOIN演算に相当する(2つの変数束縛情報のリストを結合する)
+	 * 変数束縛情報のリストを全て結合する
 	 *
-	 * @param array1
-	 *            変数束縛情報のリスト
-	 * @param array2
-	 *            変数束縛情報のリスト
-	 * @return 結合された変数束縛情報のリスト
-	 * @author Yoshida
+	 * @param theBindingsList
+	 *            変数束縛情報のリストのリスト
+	 * @return 結合後の変数束縛情報のリスト
 	 */
-	public static List<Map<String, String>> join(List<Map<String, String>> array1, List<Map<String, String>> array2) {
-		// 空のリストを用意
-		List<Map<String, String>> merge = new ArrayList<>();
-		// それぞれのタプルに対する2重ループ
-		for (Map<String, String> hash1 : array1) {
-			for (Map<String, String> hash2 : array2) {
-				Map<String, String> hash = new HashMap<>(hash1);// hash1をコピー
-				boolean add = true;// hashを追加すべきかどうか
-				for (String key : hash2.keySet()) {// hash2のキーに対して
-					if (hash1.containsKey(key)) {// hash1にそのキーが存在する時
-						if (!hash2.get(key).equals(hash1.get(key))) {// 値が同じでないなら
-							add = false;// 追加しない
-							break;
-						}
-					} else {// hash1に存在しないキーのとき
-						hash.put(key, hash2.get(key));// hashに追加
-					}
-				}
-				if (add) {// 追加すべき時
-					merge.add(hash);// 結合されたタプルを追加
+	public List<Map<String, String>> join(List<List<Map<String, String>>> theBindingsList) {
+		int size = theBindingsList.size();
+		switch (size) {
+		case 0:
+			// 失敗している時？
+			break;
+		case 1:
+			return theBindingsList.get(0);
+		case 2:
+			List<Map<String, String>> bindings1 = theBindingsList.get(0);
+			List<Map<String, String>> bindings2 = theBindingsList.get(1);
+			return joinBindings(bindings1, bindings2);
+		default:
+			bindings1 = theBindingsList.get(0);
+			theBindingsList.remove(bindings1);
+			bindings2 = join(theBindingsList);
+			return joinBindings(bindings1, bindings2);
+		}
+		// ダミー
+		return null;
+	}
+
+	/**
+	 * 変数束縛情報のリストを結合する
+	 *
+	 * @param theBindings1
+	 *            変数束縛情報のリスト1
+	 * @param theBindings2
+	 *            変数束縛情報のリスト2
+	 * @return 結合後の変数束縛情報のリスト
+	 */
+	public List<Map<String, String>> joinBindings(List<Map<String, String>> theBindings1,
+			List<Map<String, String>> theBindings2) {
+		List<Map<String, String>> resultBindings = new ArrayList<>();
+		for (int i = 0; i < theBindings1.size(); i++) {
+			Map<String, String> theBinding1 = theBindings1.get(i);
+			for (int j = 0; j < theBindings2.size(); j++) {
+				Map<String, String> theBinding2 = theBindings2.get(j);
+				Map<String, String> resultBinding = joinBinding(theBinding1, theBinding2);
+				if (resultBinding.size() != 0) {
+					resultBindings.add(resultBinding);
 				}
 			}
 		}
-		return merge;
+		return resultBindings;
 	}
+
+	/**
+	 * 変数束縛情報を結合する
+	 *
+	 * @param theBinding1
+	 *            変数束縛情報1
+	 * @param theBinding2
+	 *            変数束縛情報2
+	 * @return 結合後の変数束縛情報
+	 */
+	public Map<String, String> joinBinding(Map<String, String> theBinding1, Map<String, String> theBinding2) {
+		Map<String, String> resultBinding = new HashMap<>();
+		// System.out.println(theBinding1.toString() + "<->" +
+		// theBinding2.toString());
+		// theBinding1 の key & value をすべてコピー
+		for (Iterator<String> e = theBinding1.keySet().iterator(); e.hasNext();) {
+			String key = (String) e.next();
+			String value = (String) theBinding1.get(key);
+			resultBinding.put(key, value);
+		}
+		// theBinding2 の key & value を入れて行く，競合があったら失敗
+		for (Iterator<String> e = theBinding2.keySet().iterator(); e.hasNext();) {
+			String key = (String) e.next();
+			String value2 = (String) theBinding2.get(key);
+			if (resultBinding.containsKey(key)) {
+				String value1 = (String) resultBinding.get(key);
+				// System.out.println("=>"+value1 + "<->" + value2);
+				if (!value2.equals(value1)) {
+					resultBinding.clear();
+					break;
+				}
+			}
+			resultBinding.put(key, value2);
+		}
+		return resultBinding;
+	}
+
 } // end of class definition

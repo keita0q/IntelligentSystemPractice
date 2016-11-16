@@ -79,7 +79,7 @@ public class SemanticNet {
 	 * 変数束縛情報のリストを全て結合する
 	 *
 	 * @param theBindingsList
-	 *            変数束縛情報のリスト
+	 *            変数束縛情報のリストのリスト
 	 * @return 結合後の変数束縛情報のリスト
 	 */
 	public ArrayList join(ArrayList theBindingsList) {
