@@ -61,15 +61,15 @@ public class NaturalLanguage {
 									if (morph.isNoun() && !morph.isPronoun()) {
 										noun2 += morph.getSurface();
 									} else {
-										// 助詞が「の」のとき
-										if (particle.equals("の")) {
-											query.add(new Link(noun1, noun2, VALUE));
-											return query;
-										}
-										query.add(new Link(NAME, noun1, noun2));
 										break;
 									}
 								}
+								// 助詞が「の」のとき
+								if (particle.equals("の")) {
+									query.add(new Link(noun1, noun2, VALUE));
+									return query;
+								}
+								query.add(new Link(NAME, noun1, noun2));
 							} else if (particle.equals("は")) {
 								// 助詞が「は」のとき
 								query.add(new Link(NAME, "is-a", noun1));
