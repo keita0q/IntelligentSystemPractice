@@ -1,0 +1,5 @@
+is-a Yoshida NIT-student
+friend Yoshida Yoshino
+like Yoshida programming
+own Yoshida iPod
+own Yoshida walkman

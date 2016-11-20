@@ -1,0 +1,5 @@
+is-a Asano NIT-student
+friend Asano Matsunaga
+like Asano climbing-mountain
+own Asano bicycle
+own Asano lantern
