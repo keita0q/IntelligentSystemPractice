@@ -1,0 +1,5 @@
+is-a Nakamura Software-Engineer
+has-a Nakamura MacBookPro
+hobby nakamura soccer
+friend Nakamura Nishi
+like Nakamura Coding

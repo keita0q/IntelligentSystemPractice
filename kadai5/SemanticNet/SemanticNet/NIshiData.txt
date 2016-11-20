@@ -1,0 +1,6 @@
+like Nishi McDonalds
+is-a Nishi Green
+own Nishi iPad
+hobby Nishi training 
+birth Nishi march
+has-a Nishi guitar
