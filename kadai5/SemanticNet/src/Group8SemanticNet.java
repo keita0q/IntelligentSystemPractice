@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /***
- * Semantic Net の使用例
+ * Semantic Net
+ * @author Mizutani
  */
 public class Group8SemanticNet {
 	public static void main(String args[]) {

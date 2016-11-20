@@ -11,6 +11,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+/**
+ *
+ * @author Mizutani
+ */
 public class SemanticNetMapAdder {
 	int iterateMax = 1000;			// ノードの移動を1000手と設定。
 	double mapCenter = 100.0d;		// マップのおおよその中心。たぶんだいぶずれる。
