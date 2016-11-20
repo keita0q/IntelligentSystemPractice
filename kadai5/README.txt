@@ -2,6 +2,9 @@
 SemanticNetディレクトリ
 	SemanticNetGUI.javaファイルを追加。
 	Example.javaファイルにSemanticNetGUIクラスの使い方の例を追加。
+	SemanticNetLoadFiles.javaファイルを追加。
+	SemanticNetMapAdder.javaファイルを追加。
+	Group8SemanticNet.javaファイルを追加。
 	他のソースの内容は変更していない。コメントのみ変更。
 
 Frameディレクトリ
