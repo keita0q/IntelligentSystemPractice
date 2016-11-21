@@ -1,0 +1,5 @@
+is-a Mizutani NIT-student
+
+hobby Mizutani tennis
+own Mizutani iPhone
+is-a Mizutani Pokemon
